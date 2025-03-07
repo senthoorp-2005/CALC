@@ -32,10 +32,9 @@
         .outlook:hover {
             box-shadow: 5px 5px 15px red;
         }
-        /* Added styles for input fields */
         input[type="text"] {
-            font-size: 40px; /* Increase font size */
-            text-align: right; /* Align text to the right */
+            font-size: 40px;
+            text-align: right;
         }
     </style>
 </head>
@@ -53,7 +52,7 @@
                 <td><button class="sy" onclick="appendToInput('%')">%</button></td>
                 <td><button class="sy" onclick="appendToInput('/')">/</button></td>
                 <td><button class="sy" onclick="appendToInput('^2')">x<sup>2</sup></button></td>
-                <td><button class="sy" onclick="appendToInput('sqrt(')">√x</button></td>
+                <td><button class="sy" onclick="appendToSqrt()">√x</button></td>
             </tr>
             <tr>
                 <td><button onclick="appendToInput('7')">7</button></td>
@@ -73,10 +72,10 @@
                 <td><button onclick="appendToInput('3')">3</button></td>
                 <td><button class="sy" onclick="appendToInput('+')">+</button></td>
             </tr>
-	    <tr>
-		<td> </td>
-		<td><button onclick="appendToInput('0')">0</button></td>
-	    </tr>
+            <tr>
+                <td> </td>
+                <td><button onclick="appendToInput('0')">0</button></td>
+            </tr>
         </table>
     </div>
     <br>
@@ -88,38 +87,43 @@
     </div>
 
     <script>
-        let inputHistory = []; // Stack to keep track of input history
-
+        let inputHistory = [];
+        let sqrtActive = false;
         function appendToInput(value) {
             const inputField = document.getElementById('inputField');
-            inputHistory.push(inputField.value); // Store the current input for undo
+            inputHistory.push(inputField.value);
             inputField.value += value;
-            document.getElementById('outputField').value = ''; // Clear output when new input is added
+            document.getElementById('outputField').value = ''; 
+            if (sqrtActive) {
+                inputField.value += ')';
+                sqrtActive = false;
+            }
+        }
+        function appendToSqrt() {
+            const inputField = document.getElementById('inputField');
+            inputHistory.push(inputField.value);
+            inputField.value += 'sqrt(';
+            sqrtActive = true;
         }
 
         function calculateResult() {
             const inputField = document.getElementById('inputField');
             const outputField = document.getElementById('outputField');
             let expression = inputField.value;
-
-            // Handle square root and square operations
             expression = expression.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
             expression = expression.replace(/(\d+)\^2/g, '($1 * $1)');
-
             try {
                 const result = eval(expression);
                 outputField.value = result;
             } catch (error) {
                 outputField.value = 'Error';
             }
-
-            inputField.value = ''; // Clear input field after calculation
+            inputField.value = ''; 
         }
-
         function undo() {
             const inputField = document.getElementById('inputField');
             if (inputHistory.length > 0) {
-                inputField.value = inputHistory.pop(); // Restore previous input
+                inputField.value = inputHistory.pop();
             }
         }
     </script>
